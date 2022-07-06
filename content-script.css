@@ -1,0 +1,104 @@
+.myModal{
+    width: 700px;
+    border: 1px solid gray;
+    position: absolute;
+    top: 0;
+    left: 200%;
+    background-color: rgb(255, 255, 255);
+    display: flex;
+    justify-content: space-around;
+    z-index: 10;
+}
+
+.hideModal{
+    opacity: 0;
+    pointer-events: none;
+}
+
+.showModal{
+    opacity: 1;
+    pointer-events: all;
+}
+
+.radioContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.radioBtnAndLabelContainer{
+    width: 50%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.tagCategoryContainer{
+    width: 180px;
+    text-align: center;
+}
+
+.headingLabel{
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.btnUpdateTag{
+    border: none;
+    width: 80px;
+    height: 60px;
+    background-color: #db8f02;   
+    color: white;
+    font-weight: 900;
+    transition: background-color 150ms ease-in-out;
+}
+
+.btnAddTag{
+    border: none;
+    width: 80px;
+    height: 60px;
+    background-color: rgb(96, 231, 36);
+    color: white;
+    font-weight: 900;
+    transition: background-color 150ms ease-in-out;
+}
+
+.btnUpdateTag:hover{
+    background-color: #b77700; 
+}
+
+.btnAddTag:hover{
+    background-color: rgb(71, 172, 28);
+}
+
+.backgroundOverlay{
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    opacity: 0;
+}
+
+.jobIdColumn{
+    position: relative;
+}
+
+.messageContainer{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    color: white;
+    font-weight: 900;
+    text-align: center;
+}
+
+.messageContainerSuccess{ 
+    background-color: green;
+}
+
+.messageContainerFailure{
+    background-color: red;
+}

@@ -1,0 +1,21 @@
+{
+    "name": "Transcription Tagger",
+    "version": "1.0.0",
+    "description": "add a descriptive tag to a job",
+    "manifest_version": 3,
+    "author": "Stephen Jason",
+    "permissions": [
+        "activeTab"
+      ],
+      "content_scripts": [
+        {
+          "matches": ["https://workhub.transcribeme.com/Account/WorkHistory"],
+          "js": ["tags.js", "content-script.js"],
+          "css": ["content-script.css"]
+        }
+      ], 
+      "background":{
+        "service_worker": "background.js",
+        "type": "module"
+      }
+}
