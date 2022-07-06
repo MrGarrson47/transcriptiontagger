@@ -14,7 +14,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     else if (request.queryJob) {
         queryJob(request.queryJob).then(result => {
-            sendResponse({ result: result });
+            sendResponse(result);
         }).catch(e => { console.log(e) })
 
         return true;

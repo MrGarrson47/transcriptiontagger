@@ -43,7 +43,9 @@ export const queryJob = async (searchObject) => {
     return await get(child(dbRef, `${date.year}/${date.month}/${searchObject.id}/tags`))
         .then((snapshot => {
             if (snapshot.exists()) {
-                return true;
+                return {
+                    tags: snapshot.val()
+                }
             }
             return false;
         }))

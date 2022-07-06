@@ -4,6 +4,8 @@ let categoryLabels = ["Audio_Quality", "Accents", "Enunciation", "Background_Noi
 let monthAbbreviatedNames = { Jan: "January", Feb: "February", Mar: "March", Apr: "April", May: "May", Jun: "June", Jul: "July", Aug: "Augest", Sep: "September", Oct: "October", Nov: "November", Dec: "December" }
 let monthsArray = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
+
+
 // make a button that opens the tag modal
 let createModalButton = (id) => {
     let buttonElement = document.createElement("button");
@@ -170,20 +172,20 @@ let submitTags = (id, date) => {
             id: id,
             date: date
         }
-    },  response=>{
+    }, response => {
         console.log(response.result)
-        if( response.result){
+        if (response.result) {
             styleModalButton(id, date);
             displaySubmitTagsMessage(id, true)
         }
-        else{
+        else {
             displaySubmitTagsMessage(id, false)
         }
     });
 }
 
 // display a message if the submission of the tags was successful or not
-let displaySubmitTagsMessage = (id, wasSuccessful)=>{
+let displaySubmitTagsMessage = (id, wasSuccessful) => {
     let message = wasSuccessful ? "Submitted tags!" : "Could not submit tags, please try again";
     let containerStyle = wasSuccessful ? "messageContainerSuccess" : "messageContainerFailure";
     let messageContainer = document.createElement("div");
@@ -230,44 +232,69 @@ let getSelectedValueFromRadioButtonsGroup = (radioButtonGroup) => {
     return selectedValue;
 }
 
-// style the button that opens the modal based on if the job has already been tagged
-let styleModalButton = (id, date) => { 
-    let button = document.getElementById(`open-modal-button-for-${id}`);
-    if(button.classList.contains("btnUpdateTag")){
-        button.classList.remove("btnUpdateTag");
-    }
-    else if(button.classList.contains("btnAddTag")){
-        button.classList.remove("btnAddTag");
-    }
-    if (button) {
-        chrome.runtime.sendMessage({ queryJob: { id, date: date } }, response => {
-            button.classList.add(response.result ? "btnUpdateTag" : "btnAddTag");
-            button.innerText = response.result ? "Update Tags" : "Add Tags";
-        })
-    }
-}
-
 // loop over each job entry and 
 globalThis.addTaggingForEachJob = () => {
     for (let i = 1; i < table.children[0].children.length - 1; i++) {
         // get the job id, job date, job id element handle, job date element handle
-        let jobInfo = getJobInfo(i); 
+        let jobInfo = getJobInfo(i);
 
         if (jobInfo.id) {
             assignIdToJobIdColumn(jobInfo.id, jobInfo.idHandle);
-            assignClassToJobIdColumn(jobInfo.idHandle) 
-            assignIdToJobDateColumn(jobInfo.id, jobInfo.dateHandle); 
-            clearInnerTextOfJobIDColumn(jobInfo.idHandle); 
+            assignClassToJobIdColumn(jobInfo.idHandle)
+            assignIdToJobDateColumn(jobInfo.id, jobInfo.dateHandle);
+            clearInnerTextOfJobIDColumn(jobInfo.idHandle);
 
-            let modal = createModal(jobInfo.id, jobInfo.date); 
-            let openModalBtn = createModalButton(jobInfo.id); 
-            appendOpenModalBtnToJobIdColumn(jobInfo.idHandle, openModalBtn); 
+            let modal = createModal(jobInfo.id, jobInfo.date);
+            let openModalBtn = createModalButton(jobInfo.id);
+            appendOpenModalBtnToJobIdColumn(jobInfo.idHandle, openModalBtn);
             appendModalToJobIdColumn(modal, jobInfo.idHandle);
 
-            styleModalButton(jobInfo.id, jobInfo.date);
+            queryJobIsTagged(jobInfo.id, jobInfo.date);
         }
     }
 
+}
+
+// style the open modal btn according to if a job is tagged, and change the selected radio btns of each tag category to reflect the tag choices (if any)
+let queryJobIsTagged = (id, date) => {
+    chrome.runtime.sendMessage({ queryJob: { id, date } }, response => {
+        if (response) {
+            styleModalButton(id, true);
+            reflectTagChoices(id, response.tags);
+        }
+        else {
+            styleModalButton(id, false);
+        }
+    })
+}
+
+// show the tag choices for a job that has already been tagged
+let reflectTagChoices = (id, tags) => {
+    let { audioQuality, accent, enunciation, backgroundNoise } = tags;
+    let audioQualityRadios = document.getElementsByClassName(`Audio_Quality-for-${id}`);
+    let accentRadios = document.getElementsByClassName(`Accents-for-${id}`);
+    let enunciationRadios = document.getElementsByClassName(`Enunciation-for-${id}`);
+    let backgroundNoiseRadios = document.getElementsByClassName(`Background_Noise-for-${id}`);
+    audioQualityRadios[ratingLabels.indexOf(audioQuality)].checked = true;
+    accentRadios[ratingLabels.indexOf(accent)].checked = true;
+    enunciationRadios[ratingLabels.indexOf(enunciation)].checked = true;
+    backgroundNoiseRadios[ratingLabels.indexOf(backgroundNoise)].checked = true;
+}
+
+// style the button that opens the modal based on if the job has already been tagged
+let styleModalButton = (id, isTagged) => {
+    let button = document.getElementById(`open-modal-button-for-${id}`);
+    if (button) {
+        if (button.classList.contains("btnUpdateTag")) {
+            button.classList.remove("btnUpdateTag");
+        }
+        else if (button.classList.contains("btnAddTag")) {
+            button.classList.remove("btnAddTag");
+        }
+
+        button.classList.add(isTagged ? "btnUpdateTag" : "btnAddTag");
+        button.innerText = isTagged ? "Update Tags" : "Add Tags";
+    }
 }
 
 // append the entire modal to the job id column
