@@ -5,7 +5,7 @@
     "manifest_version": 3,
     "author": "Stephen Jason",
     "permissions": [
-        "activeTab"
+        "activeTab", "tabs"
       ],
       "content_scripts": [
         {

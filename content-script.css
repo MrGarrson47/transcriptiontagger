@@ -102,3 +102,20 @@
 .messageContainerFailure{
     background-color: red;
 }
+
+.dbConnectionErrorContainer{
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    color: white;
+    font-weight: 900;
+    font-size: 30px;
+    text-align: center;
+    background-color: red;
+}
+
