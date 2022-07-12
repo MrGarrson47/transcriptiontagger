@@ -1,10 +1,7 @@
-let table = document.querySelector("#tblHistory");
 let ratingLabels = ["Fine", "Bad", "Terrible"];
 let categoryLabels = ["Audio_Quality", "Accents", "Enunciation", "Background_Noise"];
 let monthAbbreviatedNames = { Jan: "January", Feb: "February", Mar: "March", Apr: "April", May: "May", Jun: "June", Jul: "July", Aug: "Augest", Sep: "September", Oct: "October", Nov: "November", Dec: "December" }
 let monthsArray = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-
-
 
 // make a button that opens the tag modal
 let createModalButton = (id) => {
@@ -131,13 +128,17 @@ let createModal = (id, date) => {
 
 // get the date TD element
 let getDateTDElement = (i) => {
-    let allTDs = table.children[0].children[i].querySelectorAll("td");
-    return allTDs[2];
+    let table = document.querySelector("#tblHistory");
+    let allTrs = table.querySelectorAll("tr");
+    let allTds = allTrs[i].querySelectorAll("td");
+    return allTds[2];
 }
 
 // get the TD element
 let getTDElement = (i) => {
-    return table.children[0].children[i].querySelector("td");
+    let table = document.querySelector("#tblHistory");
+    let allTrs = table.querySelectorAll("tr");
+    return allTrs[i].querySelector("td");
 }
 
 // get the TD element's id
@@ -232,13 +233,79 @@ let getSelectedValueFromRadioButtonsGroup = (radioButtonGroup) => {
     return selectedValue;
 }
 
-// loop over each job entry and 
-globalThis.addTaggingForEachJob = () => {
-    for (let i = 1; i < table.children[0].children.length - 1; i++) {
-        // get the job id, job date, job id element handle, job date element handle
-        let jobInfo = getJobInfo(i);
+// when the search and more records buttons are clicked then add tag modal to the new jobs list
+let addClickEventsToJobRecordsBtns = () => {
+    addSearchBtnHandler();
+    addMoreRecordsBtnHandler();
+}
 
-        if (jobInfo.id) {
+// add search button click event
+let addSearchBtnHandler = ()=>{
+    let searchButton = document.getElementById("historyRefresh");
+    searchButton.addEventListener("click", () => { addTaggingAfterJobRefresh("Filter") })
+}
+
+// add more records button click event
+let addMoreRecordsBtnHandler = ()=>{
+    let moreRecordsButton;
+    let pageButtons = document.getElementsByName("action");
+    pageButtons.forEach(btn => {
+        if (btn.value === "ShowMore") {
+            moreRecordsButton = btn;
+        }
+    })
+    moreRecordsButton.addEventListener("click", () => { addTaggingAfterJobRefresh("ShowMore") })
+}
+
+// add tag modals after the jobs have been refreshed
+let addTaggingAfterJobRefresh = (btnValue) => {
+    try {
+        jobsAreDoneLoading(5, btnValue);
+    }
+    catch (error) {
+        console.log(error)
+    }
+
+}
+
+// add tag modals if the jobs have loaded
+let jobsAreDoneLoading = (retryCount, btnValue) => {
+    if (retryCount === 0) {
+        throw "The jobs took too long to load, please try again.";
+    }
+    setTimeout(() => {
+        let currentAmountOfJobs = document.querySelectorAll(".jobIdColumn").length;
+        let table = document.querySelector("#tblHistory");
+        let allJobs = table.querySelectorAll("tr").length;
+        if (btnValue === "Filter") {
+            if (currentAmountOfJobs === 0) {
+                addTaggingForEachJob();
+                addSearchBtnHandler();
+                addMoreRecordsBtnHandler();
+            }
+            else {
+                jobsAreDoneLoading(retryCount - 1, btnValue);
+            }
+        }
+        if (btnValue === "ShowMore") {
+            if (currentAmountOfJobs < allJobs) {
+                addTaggingForEachJob(currentAmountOfJobs);
+            }
+            else {
+                jobsAreDoneLoading(retryCount - 1, btnValue);
+            }
+        }
+    }, 2000)
+}
+
+// loop over each job entry and 
+globalThis.addTaggingForEachJob = (startingIndex = 1) => {
+    let table = document.querySelector("#tblHistory");
+    let allTrs = table.querySelectorAll("tr");
+    for (let i = startingIndex; i < allTrs.length; i++) {
+
+        let jobInfo = getJobInfo(i);
+        if (jobInfoIsValid(jobInfo)) {
             assignIdToJobIdColumn(jobInfo.id, jobInfo.idHandle);
             assignClassToJobIdColumn(jobInfo.idHandle)
             assignIdToJobDateColumn(jobInfo.id, jobInfo.dateHandle);
@@ -253,6 +320,15 @@ globalThis.addTaggingForEachJob = () => {
         }
     }
 
+}
+
+addClickEventsToJobRecordsBtns();
+
+let jobInfoIsValid = (jobInfo) => {
+    if (!jobInfo.id || (jobInfo.id && jobInfo.id.length > 50) ) {
+        return false;
+    }
+    return true;
 }
 
 // style the open modal btn according to if a job is tagged, and change the selected radio btns of each tag category to reflect the tag choices (if any)
